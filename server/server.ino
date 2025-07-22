@@ -46,9 +46,9 @@ void extractMsgFromBody()
 {
     int idx_start_msg = -1;
     const char* key = "message=";
-    char* it_body_idx_start_msg = strstr(g_body, key);
-    if (it_body_idx_start_msg != NULL)
-        idx_start_msg = it_body_idx_start_msg - g_body; // position where "message=" starts
+    char* addr_start_msg = strstr(g_body, key);
+    if (addr_start_msg != NULL)
+        idx_start_msg = addr_start_msg - g_body; // position where "message=" starts
     if(idx_start_msg != -1 && idx_start_msg + 8 < MAX_BODY_LEN)
     {
         int it_body = idx_start_msg + 8;
