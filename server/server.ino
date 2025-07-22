@@ -5,20 +5,110 @@
 #define GPIO2 2
 #define GPIO3 3
 
-#define MAX_NUM_MESSAGES 100
+#define MAX_NUM_MESSAGES 50
 #define MAX_BODY_LEN 1024
-#define MAX_MSG_LEN 512
-
+#define MAX_it_msg 512
 
 const char ssid[] = "";
 const char password[] = "";
 
-
 WiFiServer server(80); // Instance of the server. arg is the port to listen on
 
-String messages[MAX_NUM_MESSAGES];
 int num_messages = 0;
+char g_messages[MAX_NUM_MESSAGES][MAX_it_msg]; // pre alocated space for the messages so that there is no memory fragmentation
+char g_body[MAX_BODY_LEN];
+char g_message[MAX_it_msg];
 
+
+void readBody(WiFiClient* p_client)
+{
+    int it_msg = 0;
+    int body_len = 0;
+
+    delay(1000); // without delay it sometimes catches only the first 32 bytes
+    while(p_client->available() && it_msg < MAX_BODY_LEN - 1)
+    {
+        char c = p_client->read();
+        g_body[it_msg++] = c;
+        body_len++;
+    }
+
+    Serial.print(F("# Body size: "));
+    Serial.println(body_len);
+    g_body[it_msg] = '\0';
+
+    Serial.print(F("# Body: "));
+    Serial.println(g_body);
+    Serial.println();
+}
+
+void extractMsgFromBody()
+{
+    int idx_start_msg = -1;
+    const char* key = "message=";
+    char* it_body_idx_start_msg = strstr(g_body, key);
+    if (it_body_idx_start_msg != NULL)
+        idx_start_msg = it_body_idx_start_msg - g_body; // position where "message=" starts
+    if(idx_start_msg != -1 && idx_start_msg + 8 < MAX_BODY_LEN)
+    {
+        int it_body = idx_start_msg + 8;
+        int it_msg = 0;
+        while(it_body < MAX_BODY_LEN - 1 && // copies only untill the body limit and/or
+                g_body[it_body] != '\0' &&    // copies only untill proper message end and/or
+                it_msg < MAX_it_msg - 1)    // copies only untill the message limit
+            g_message[it_msg++] = g_body[it_body++];
+        g_message[it_msg] = '\0'; // ensures str terminator
+        Serial.print(F("# Message size: "));
+        Serial.println(it_msg);
+    }
+    else
+        g_message[0] = '\0'; // empty message
+
+    Serial.print(F("# Message: "));
+    Serial.println(g_message);
+}
+
+
+void decode()
+{
+    char *leader = g_message;
+    char *follower = leader;
+
+    // While we're not at the end of the string (current character not NULL)
+    while (*leader)
+    {
+        // Check to see if the current character is a %
+        if (*leader == '%')
+        {
+            // Grab the next two characters and move leader forwards
+            leader++;
+            char high = *leader;
+            leader++;
+            char low = *leader;
+
+            // Convert ASCII 0-9A-F to a value 0-15
+            if (high > 0x39)
+                high -= 7;
+            high &= 0x0f;
+
+            // Same again for the low byte:
+            if (low > 0x39) low -= 7;
+            low &= 0x0f;
+
+            // Combine the two into a single byte and store in follower:
+            *follower = (high << 4) | low;
+        }
+        else
+            // All other characters copy verbatim
+            *follower = *leader;
+
+        // Move both pointers to the next character:
+        leader++;
+        follower++;
+    }
+    // Terminate the new string with a NULL character to trim it off
+    *follower = 0;
+}
 
 void setup()
 {
@@ -36,15 +126,16 @@ void setup()
     while(WiFi.status() != WL_CONNECTED)
     {
         delay(500);
-        // Serial.print(F("."));
+        Serial.print(F("."));
     }
+    Serial.println();
 
     // Start the server
     server.begin();
 
     // Print the IP address
-    // Serial.print(F("Serving at "));
-    // Serial.println(WiFi.localIP());
+    Serial.print(F("Serving at "));
+    Serial.println(WiFi.localIP());
 }
 
 void loop()
@@ -56,7 +147,7 @@ void loop()
     WiFiClient client = server.accept();
     if(client)
     {        
-        client.setTimeout(1000);  // default is 1000
+        client.setTimeout(1000);
 
         // Read the first line of the request
         String req = client.readStringUntil('\r');
@@ -72,177 +163,52 @@ void loop()
             client.print(F("<h2>Send a message:</h2>\r\n"));
 
             // Form to send a text
-            client.print(F("<br><br><form action='/send/text' method='POST'>"));
-            client.print(F("<input type='text' name='text' placeholder='Text'>"));
+            client.print(F("<br><br><form action='/send/browser/text' method='POST'>"));
+            client.print(F("<input type='text' name='message' placeholder='Text'>"));
             client.print(F("<input type='submit' value='Send'></form>"));
 
             // Form to send a URL
-            client.print(F("<br><br><form action='/send/url' method='POST'>"));
-            client.print(F("<input type='text' name='url' placeholder='URL'>"));
+            client.print(F("<br><br><form action='/send/browser/url' method='POST'>"));
+            client.print(F("<input type='text' name='message' placeholder='URL'>"));
             client.print(F("<input type='submit' value='Send'></form>"));
 
             // Back button
             client.print(F("<br><br><button onclick=\"window.location.href='/'\">Back</button>"));
             client.print(F("</body></html>"));
         }
-        else if(req.indexOf("/send/text") != -1)
+        else if(req.indexOf("/send/browser/text") != -1 ||
+                req.indexOf("/send/browser/url") != -1  ||
+                req.indexOf("/send/cli") != -1)
         {
-            // Body 
+            // Read HTML body and write in the g_body array
+            readBody(&client);
 
-            char body[MAX_BODY_LEN];
-            int it_idx_msg = 0;
-            int body_len = 0;
+            // Extract the message from the body and write in the g_message array
+            extractMsgFromBody();
 
-            delay(1000); // without delay it sometimes catches only the first 32 bytes
-            while(client.available() && it_idx_msg < MAX_BODY_LEN - 1)
+            if(req.indexOf("/send/browser/text") != -1)
             {
-                char c = client.read();
-                body[it_idx_msg++] = c;
-                body_len++;
+                // Replace '+' with ' '
+                for (int i = 0; g_message[i] != '\0'; i++)
+                    if (g_message[i] == '+')
+                        g_message[i] = ' ';
             }
 
-            Serial.print(F("# Body size: "));
-            Serial.println(body_len);
-            body[it_idx_msg] = '\0';
-
-            Serial.print(F("# Body: "));
-            Serial.println(body);
-            Serial.println();
-
-
-            // Text sent
-
-            int idx = -1;
-            const char* key = "text=";
-            char* found = strstr(body, key);
-            if (found != NULL)
-                idx = found - body; // position where "text=" starts
-            char message[MAX_MSG_LEN];
-            if(idx != -1 && idx + 5 < MAX_BODY_LEN)
+            // Decode only messages sent from browser
+            if(req.indexOf("/send/browser") != -1)
             {
-                int msg_start = idx + 5;
-                int msg_len = 0;
-                while(msg_start < MAX_BODY_LEN - 1 && body[msg_start] != '\0' && msg_len < MAX_MSG_LEN - 1)
-                    message[msg_len++] = body[msg_start++];
-                message[msg_len] = '\0';
-                Serial.print(F("# Text size: "));
-                Serial.println(msg_len);
+                decode();
+                Serial.print(F("# Decoded Message: "));
+                Serial.println(g_message);
+                Serial.println();
             }
-            else
-                message[0] = '\0'; // empty message
-
-            Serial.print(F("# Text: "));
-            Serial.println(message);
-            Serial.println();
-
 
             // Save text in memory
             if(num_messages < MAX_NUM_MESSAGES)
-                messages[num_messages++] = message;
-
-            
-            // Dialog
-            client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\n"));
-            client.print(F("<head><title>sent</title></head>\r\n"));
-            client.print(F("<body style='font-family: Arial; text-align: center;'>\r\n"));
-            client.print(F("<br><br><dialog open id='md'><p>Message sent!</p>"));
-            client.print(F("<button onclick=\"window.location.href='/'\">Close</button>"));
-            client.print(F("</body></html>"));
-        }
-        else if(req.indexOf("/send/url") != -1)
-        {
-            // Body
-
-            char body[MAX_BODY_LEN];
-            int it_idx_msg = 0;
-            int body_len = 0;
-
-            delay(1000); // without delay it sometimes catches only the first 32 bytes
-            while(client.available() && it_idx_msg < MAX_BODY_LEN - 1)
             {
-                char c = client.read();
-                body[it_idx_msg++] = c;
-                body_len++;
+                strcpy(g_messages[num_messages], g_message);
+                num_messages++;
             }
-
-            Serial.print(F("# Body size: "));
-            Serial.println(body_len);
-            body[it_idx_msg] = '\0';
-
-            Serial.print(F("# Body: "));
-            Serial.println(body);
-            Serial.println();
-
-
-            // URL sent
-
-            int idx = -1;
-            const char* key = "url=";
-            char* found = strstr(body, key);
-            if (found != NULL)
-                idx = found - body; // position where "url=" starts
-            char message[MAX_MSG_LEN];
-            if(idx != -1 && idx + 4 < MAX_BODY_LEN)
-            {
-                int msg_start = idx + 4;
-                int msg_len = 0;
-                while(msg_start < MAX_BODY_LEN - 1 && body[msg_start] != '\0' && msg_len < MAX_MSG_LEN - 1)
-                    message[msg_len++] = body[msg_start++];
-                message[msg_len] = '\0';
-                Serial.print(F("# Message size: "));
-                Serial.println(msg_len);
-            }
-            else
-                message[0] = '\0'; // empty message
-
-            Serial.print(F("# URL: "));
-            Serial.println(message);
-
-
-            // Decode URL
-
-            // Create two pointers that point to the start of the data
-            char *leader = message; // data;
-            char *follower = leader;
-            // While we're not at the end of the string (current character not NULL)
-            while (*leader)
-            {
-                // Check to see if the current character is a %
-                if (*leader == '%')
-                {
-                    // Grab the next two characters and move leader forwards
-                    leader++;
-                    char high = *leader;
-                    leader++;
-                    char low = *leader;
-                    // Convert ASCII 0-9A-F to a value 0-15
-                    if (high > 0x39)
-                        high -= 7;
-                    high &= 0x0f;
-                    // Same again for the low byte:
-                    if (low > 0x39) low -= 7;
-                    low &= 0x0f;
-                    // Combine the two into a single byte and store in follower:
-                    *follower = (high << 4) | low;
-                }
-                else
-                    // All other characters copy verbatim
-                    *follower = *leader;
-                // Move both pointers to the next character:
-                leader++;
-                follower++;
-            }
-            // Terminate the new string with a NULL character to trim it off
-            *follower = 0;
-
-            Serial.print(F("# Decoded URL: "));
-            Serial.println(message);
-            Serial.println();
-
-
-            // Save text in memory
-            if(num_messages < MAX_NUM_MESSAGES)
-                messages[num_messages++] = message;
 
             // Dialog
             client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\n"));
@@ -264,7 +230,9 @@ void loop()
             for(int i=0; i < num_messages; i++)
             {  
                 client.print(F("<br>"));
-                client.print(messages[i]);
+                client.print(F("<pre>"));
+                client.print(g_messages[i]);
+                client.print(F("</pre>"));
             }
 
             // Back button
@@ -315,10 +283,7 @@ void loop()
             client.print(F("</body></html>"));
         }
 
-        // read/ignore the rest of the request
-        // do not client.flush(): it is for output only, see below
         while(client.available())
-            // byte by byte is not very efficient
             client.read();
     }
 }
