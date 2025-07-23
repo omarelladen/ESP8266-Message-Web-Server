@@ -1,4 +1,4 @@
-- Built with the Arduino Framework
+- Built with the Arduino framework
 
 <p align="center" width="100%">
 <img src="imgs/home.png">
