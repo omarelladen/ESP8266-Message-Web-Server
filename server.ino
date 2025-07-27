@@ -9,8 +9,8 @@
 #define MAX_BODY_LEN 1024
 #define MAX_it_msg 512
 
-const char ssid[] = "";
-const char password[] = "";
+const char ssid[] = "Apartamento";
+const char password[] = "ali2omar";
 
 WiFiServer server(80); // Instance of the server. arg is the port to listen on
 
@@ -67,7 +67,6 @@ void extractMsgFromBody()
     Serial.print(F("# Message: "));
     Serial.println(g_message);
 }
-
 
 void decode()
 {
