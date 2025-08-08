@@ -113,7 +113,7 @@ void setup()
 {
     Serial.begin(115200);
     delay(2000);
-
+    
     // pinMode(GPIO0, OUTPUT);
     // pinMode(GPIO1, OUTPUT);
     // pinMode(GPIO2, OUTPUT);
@@ -256,7 +256,7 @@ void loop()
             client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\n"));
             client.print(F("<head><title>Home</title></head>\r\n"));
             client.print(F("<body style='font-family: Arial; text-align: center;'>\r\n"));
-            client.print(F("<h1>Omar's message server</h1>\r\n"));
+            client.print(F("<h1>Message server</h1>\r\n"));
 
             // 1. Form to send a message
             client.print(F("<br><br><form action='http://"));
