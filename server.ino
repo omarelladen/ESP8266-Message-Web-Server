@@ -39,6 +39,7 @@ void readRequestLine(WiFiClient* p_client)
 
         g_request[i++] = c;
     }
+    g_request[i] = '\0';
 }
 
 void readBody(WiFiClient* p_client)
