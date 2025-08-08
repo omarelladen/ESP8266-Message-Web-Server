@@ -55,10 +55,10 @@ void readBody(WiFiClient* p_client)
         g_body[i++] = c;
         body_len++;
     }
+    g_body[i] = '\0';
 
     Serial.print(F("# Body size: "));
     Serial.println(body_len);
-    g_body[i] = '\0';
 
     Serial.print(F("# Body: "));
     Serial.println(g_body);
@@ -70,19 +70,22 @@ void extractMsgFromBody()
     int idx_start_msg = -1;
     const char* key = "message=";
     char* addr_start_msg = strstr(g_body, key);
+    int it_body;
+    int it_msg = 0;
+
     if (addr_start_msg != NULL)
         idx_start_msg = addr_start_msg - g_body; // position where "message=" starts
+
     if (idx_start_msg != -1 && idx_start_msg + 8 < MAX_BODY_LEN)
     {
-        int it_body = idx_start_msg + 8;
-        int i = 0;
+        it_body = idx_start_msg + 8;
         while (it_body < MAX_BODY_LEN - 1 && // copies only untill the body limit and/or
                 g_body[it_body] != '\0' &&    // copies only untill proper message end and/or
-                i < MAX_MSG_LEN - 1)    // copies only untill the message limit
-            g_message[i++] = g_body[it_body++];
-        g_message[i] = '\0'; // ensures str terminator
+                it_msg < MAX_MSG_LEN - 1)    // copies only untill the message limit
+            g_message[it_msg++] = g_body[it_body++];
+        g_message[it_msg] = '\0'; // ensures str terminator
         Serial.print(F("# Message size: "));
-        Serial.println(i);
+        Serial.println(it_msg);
     }
     else
         g_message[0] = '\0'; // empty message
@@ -95,7 +98,9 @@ void decode()
 {
     char *leader = g_message;
     char *follower = leader;
-
+    char high;
+    char low;
+    
     // While we're not at the end of the str (current character not NULL)
     while (*leader)
     {
@@ -104,9 +109,9 @@ void decode()
         {
             // Grab the next two characters and move leader forwards
             leader++;
-            char high = *leader;
+            high = *leader;
             leader++;
-            char low = *leader;
+            low = *leader;
 
             // Convert ASCII 0-9A-F to a value 0-15
             if (high > 0x39)
@@ -166,7 +171,11 @@ void loop()
     // because nagle algorithm will group them into one single packet
 
     // Check if a client has connected
+
+    int i;
+
     WiFiClient client = server.accept();
+
     if (client)
     {        
         client.setTimeout(1000);
@@ -208,7 +217,7 @@ void loop()
             if (strstr(g_request, "/send/browser/text") != NULL)
             {
                 // Replace '+' with ' '
-                for (int i = 0; g_message[i] != '\0'; i++)
+                for (i = 0; g_message[i] != '\0'; i++)
                     if (g_message[i] == '+')
                         g_message[i] = ' ';
             }
@@ -246,7 +255,7 @@ void loop()
             client.print(F("<body style='font-family: Arial; text-align: center;'>\r\n"));
             client.print(F("<h2>List of messages:</h2>\r\n"));
             
-            for (int i=0; i < num_messages; i++)
+            for (i=0; i < num_messages; i++)
             {  
                 client.print(F("<br>"));
                 client.print(F("<pre>"));
