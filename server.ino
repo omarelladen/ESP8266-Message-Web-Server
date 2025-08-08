@@ -5,9 +5,11 @@
 #define GPIO2 2
 #define GPIO3 3
 
-#define MAX_NUM_MESSAGES 50
+#define MAX_NUM_MSGS 50
 #define MAX_BODY_LEN 1024
 #define MAX_MSG_LEN 512
+#define MAX_REQ_LEN 50
+
 
 const char ssid[] = "";
 const char password[] = "";
@@ -15,12 +17,10 @@ const char password[] = "";
 WiFiServer server(80); // Instance of the server. arg is the port to listen on
 
 int num_messages = 0;
-char g_messages[MAX_NUM_MESSAGES][MAX_MSG_LEN]; // pre alocated space for the messages so that there is no memory fragmentation
+char g_messages[MAX_NUM_MSGS][MAX_MSG_LEN]; // pre alocated space for the messages so that there is no memory fragmentation
 char g_body[MAX_BODY_LEN];
 char g_message[MAX_MSG_LEN];
-
-#define REQUEST_BUFFER_SIZE 512
-char g_request[REQUEST_BUFFER_SIZE];
+char g_request[MAX_REQ_LEN];
 
 
 void readRequestLine(WiFiClient* p_client)
@@ -29,7 +29,7 @@ void readRequestLine(WiFiClient* p_client)
     char c;
 
     delay(1000);
-    while (p_client->available() && i < REQUEST_BUFFER_SIZE - 1)
+    while (p_client->available() && i < MAX_REQ_LEN - 1)
     {
         c = p_client->read();
         
@@ -40,7 +40,6 @@ void readRequestLine(WiFiClient* p_client)
         g_request[i++] = c;
     }
 }
-
 
 void readBody(WiFiClient* p_client)
 {
@@ -96,7 +95,7 @@ void decode()
     char *leader = g_message;
     char *follower = leader;
 
-    // While we're not at the end of the string (current character not NULL)
+    // While we're not at the end of the str (current character not NULL)
     while (*leader)
     {
         // Check to see if the current character is a %
@@ -128,7 +127,7 @@ void decode()
         leader++;
         follower++;
     }
-    // Terminate the new string with a NULL character to trim it off
+    // Terminate the new str with a NULL character to trim it off
     *follower = 0;
 }
 
@@ -223,7 +222,7 @@ void loop()
             }
 
             // Save text in memory
-            if (num_messages < MAX_NUM_MESSAGES)
+            if (num_messages < MAX_NUM_MSGS)
             {
                 strcpy(g_messages[num_messages], g_message);
                 num_messages++;
