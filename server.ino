@@ -252,7 +252,7 @@ void loop()
             client.print(F("<head><title>Sent</title></head>"));
             client.print(F("<script>"));
             client.print(F("alert('Message sent!');"));
-            client.print(F("window.location.href='/';"));
+            client.print(F("window.location.href='/form';"));
             client.print(F("</script>"));
             client.print(F("</html>"));
         }
@@ -286,7 +286,7 @@ void loop()
             sendHeader(&client);
             client.print(F("<head><title>Cleared</title></head>"));
             client.print(F("<script>"));
-            client.print(F("alert('Message sent!');"));
+            client.print(F("alert('Messages cleared!');"));
             client.print(F("window.location.href='/';"));
             client.print(F("</script>"));
             client.print(F("</html>"));
