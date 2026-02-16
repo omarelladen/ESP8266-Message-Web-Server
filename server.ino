@@ -26,7 +26,7 @@ char g_request[MAX_LEN_REQ];
 void sendHeader(WiFiClient* p_client)
 {
     p_client->print(F(
-        "HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML><html>"
+        "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
     ));
 }
 
@@ -80,7 +80,7 @@ void extractMsgFromBody()
     int it_body;
     int it_msg = 0;
 
-    if (addr_start_msg != NULL)
+    if (addr_start_msg)
         idx_start_msg = addr_start_msg - g_body;  // position where "message=" starts
 
     if (idx_start_msg != -1 && idx_start_msg + 8 < MAX_LEN_BODY)
@@ -191,31 +191,33 @@ void loop()
         // Read the first line of the request
         readRequestLine(&client);
 
-        if (strstr(g_request, "/form") != NULL)
+        if (strstr(g_request, "/form"))
         {
-            // client.print(F(HTML_HEADER));
             sendHeader(&client);
-            client.print(F("<head><title>form</title></head>"));
-            client.print(F("<body style='font-family: Arial; text-align: center;'>"));
-            client.print(F("<h2>Send a message:</h2>"));
+            client.print(F(
+                "<!DOCTYPE HTML><html>"
+                "<head><title>form</title></head>"
+                "<body style='font-family: Arial; text-align: center;'>"
+                "<h2>Send a message:</h2>"
 
-            // Form to send a text
-            client.print(F("<br><br><form action='/send/browser/text' method='POST'>"));
-            client.print(F("<input type='text' name='message' placeholder='Text'>"));
-            client.print(F("<input type='submit' value='Send'></form>"));
+                // Form to send a text
+                "<br><br><form action='/send/browser/text' method='POST'>"
+                "<input type='text' name='message' placeholder='Text'>"
+                "<input type='submit' value='Send'></form>"
 
-            // Form to send a URL
-            client.print(F("<br><br><form action='/send/browser/url' method='POST'>"));
-            client.print(F("<input type='text' name='message' placeholder='URL'>"));
-            client.print(F("<input type='submit' value='Send'></form>"));
+                // Form to send a URL
+                "<br><br><form action='/send/browser/url' method='POST'>"
+                "<input type='text' name='message' placeholder='URL'>"
+                "<input type='submit' value='Send'></form>"
 
-            // Back button
-            client.print(F("<br><br><button onclick=\"window.location.href='/'\">Back</button>"));
-            client.print(F("</body></html>"));
+                // Back button
+                "<br><br><button onclick=\"window.location.href='/'\">Back</button>"
+                "</body></html>"
+            ));
         }
-        else if (strstr(g_request, "/send/browser/text") != NULL ||
-                 strstr(g_request, "/send/browser/url") != NULL ||
-                 strstr(g_request, "/send/cli") != NULL)
+        else if (strstr(g_request, "/send/browser/text") ||
+                 strstr(g_request, "/send/browser/url") ||
+                 strstr(g_request, "/send/cli"))
         {
             // Read HTML body and write in the g_body array
             readBody(&client);
@@ -223,7 +225,7 @@ void loop()
             // Extract the message from the body and write in the g_message array
             extractMsgFromBody();
 
-            if (strstr(g_request, "/send/browser/text") != NULL)
+            if (strstr(g_request, "/send/browser/text"))
             {
                 // Replace '+' with ' '
                 for (i = 0; g_message[i] != '\0'; i++)
@@ -232,7 +234,7 @@ void loop()
             }
 
             // Decode only messages sent from browser
-            if (strstr(g_request, "/send/browser") != NULL)
+            if (strstr(g_request, "/send/browser"))
             {
                 decode();
                 Serial.print(F("Decoded Message: "));
@@ -247,80 +249,91 @@ void loop()
                 g_num_messages++;
             }
 
-            // Dialog
             sendHeader(&client);
-            client.print(F("<head><title>Sent</title></head>"));
-            client.print(F("<script>"));
-            client.print(F("alert('Message sent!');"));
-            client.print(F("window.location.href='/form';"));
-            client.print(F("</script>"));
-            client.print(F("</html>"));
+
+            // Dialog
+            if (strstr(g_request, "/send/browser"))
+            {
+                client.print(F(
+                    "<!DOCTYPE HTML><html>"
+                    "<head><title>Sent</title></head>"
+                    "<script>"
+                    "alert('Message sent!');"
+                    "window.location.href='/form';"
+                    "</script>"
+                    "</html>"
+                ));
+            }
         }
-        else if (strstr(g_request, "/look") != NULL)
+        else if (strstr(g_request, "/look"))
         {
             // Show messages sent
 
             sendHeader(&client);
-            client.print(F("<head><title>look</title></head>"));
-            client.print(F("<body style='font-family: Arial; text-align: center;'>"));
-            client.print(F("<h2>List of messages:</h2>"));
+            client.print(F(
+                "<!DOCTYPE HTML><html>"
+                "<head><title>look</title></head>"
+                "<body style='font-family: Arial; text-align: center;'>"
+                "<h2>List of messages:</h2>"
+            ));
 
             for (i=0; i < g_num_messages; i++)
             {
-                client.print(F("<br>"));
-                client.print(F("<pre>"));
+                client.print(F("<br><pre>"));
                 client.print(g_messages[i]);
                 client.print(F("</pre>"));
             }
 
             // Back button
-            client.print(F("<br><br><button onclick=\"window.location.href='/'\">Back</button>"));
-            client.print(F("</body></html>"));
+            client.print(F(
+                "<br><br><button onclick=\"window.location.href='/'\">Back</button>"
+                "</body></html>"
+            ));
         }
-        else if (strstr(g_request, "/clear") != NULL)
+        else if (strstr(g_request, "/clear"))
         {
             // Clear messages
 
             g_num_messages = 0;
 
             sendHeader(&client);
-            client.print(F("<head><title>Cleared</title></head>"));
-            client.print(F("<script>"));
-            client.print(F("alert('Messages cleared!');"));
-            client.print(F("window.location.href='/';"));
-            client.print(F("</script>"));
-            client.print(F("</html>"));
+            client.print(F(
+                "<!DOCTYPE HTML><html>"
+                "<head><title>Cleared</title></head>"
+                "<script>"
+                "alert('Messages cleared!');"
+                "window.location.href='/';"
+                "</script>"
+                "</html>"
+            ));
         }
         else // Home
         {
             sendHeader(&client);
-            client.print(F("<head><title>Home</title></head>"));
-            client.print(F("<body style='font-family: Arial; text-align: center;'>"));
-            client.print(F("<h1>Message server</h1>"));
+            client.print(F(
+                "<!DOCTYPE HTML><html>"
+                "<head><title>Home</title></head>"
+                "<body style='font-family: Arial; text-align: center;'>"
+                "<h1>Message server</h1>"
 
             // 1. Form to send a message
-            client.print(F("<br><br><form action='http://"));
-            client.print(WiFi.localIP());
-            client.print(F("/form' method='GET'>"));
-            client.print(F("<button type='submit'>Send</button></form>"));
+                "<br><br><form action='/form' method='GET'>"
+                "<button type='submit'>Send</button></form>"
 
             // 2. Look messages sent
-            client.print(F("<br><form action='http://"));
-            client.print(WiFi.localIP());
-            client.print(F("/look' method='GET'>"));
-            client.print(F("<button type='submit'>Look</button></form>"));
+                "<br><form action='look' method='GET'>"
+                "<button type='submit'>Look</button></form>"
 
             // 3. Clear messages
-            client.print(F("<br><form action='http://"));
-            client.print(WiFi.localIP());
-            client.print(F("/clear' method='GET'>"));
-            client.print(F("<button type='submit'>Clear</button></form>"));
+                "<br><form action='/clear' method='GET'>"
+                "<button type='submit'>Clear</button></form>"
 
             // 4. Hardware info
-            client.print(F("<br><br>"));
-            client.print(F("<dialog id='hd'><p>ESP8266-01</p><button onclick='hd.close()'>Close</button></dialog>"));
-            client.print(F("<button onclick='hd.showModal()'>Hardware info</button>"));
-            client.print(F("</body></html>"));
+                "<br><br>"
+                "<dialog id='hd'><p>ESP8266-01</p><button onclick='hd.close()'>Close</button></dialog>"
+                "<button onclick='hd.showModal()'>Hardware info</button>"
+                "</body></html>"
+            ));
         }
 
         while (client.available())
