@@ -6,21 +6,21 @@
 #define GPIO3 3
 
 #define MAX_NUM_MSGS 50
-#define MAX_BODY_LEN 1024
-#define MAX_MSG_LEN 512
-#define MAX_REQ_LEN 50
+#define MAX_LEN_BODY 1024
+#define MAX_LEN_MSG  512
+#define MAX_LEN_REQ  50
 
 
 const char ssid[] = "";
 const char password[] = "";
 
-WiFiServer server(80); // Instance of the server. arg is the port to listen on
+WiFiServer server(80);  // arg is the port to listen on
 
 int num_messages = 0;
-char g_messages[MAX_NUM_MSGS][MAX_MSG_LEN]; // pre alocated space for the messages so that there is no memory fragmentation
-char g_body[MAX_BODY_LEN];
-char g_message[MAX_MSG_LEN];
-char g_request[MAX_REQ_LEN];
+char g_messages[MAX_NUM_MSGS][MAX_LEN_MSG];  // pre alocated space for the messages so that there is no memory fragmentation
+char g_body[MAX_LEN_BODY];
+char g_message[MAX_LEN_MSG];
+char g_request[MAX_LEN_REQ];
 
 
 void readRequestLine(WiFiClient* p_client)
@@ -29,7 +29,7 @@ void readRequestLine(WiFiClient* p_client)
     char c;
 
     delay(1000);
-    while (p_client->available() && i < MAX_REQ_LEN - 1)
+    while (p_client->available() && i < MAX_LEN_REQ - 1)
     {
         c = p_client->read();
 
@@ -48,8 +48,8 @@ void readBody(WiFiClient* p_client)
     int body_len = 0;
     char c;
 
-    delay(1000); // without delay it sometimes catches only the first 32 bytes
-    while (p_client->available() && i < MAX_BODY_LEN - 1)
+    delay(1000);  // without delay it sometimes catches only the first 32 bytes
+    while (p_client->available() && i < MAX_LEN_BODY - 1)
     {
         c = p_client->read();
         g_body[i++] = c;
@@ -57,10 +57,10 @@ void readBody(WiFiClient* p_client)
     }
     g_body[i] = '\0';
 
-    Serial.print(F("# Body size: "));
+    Serial.print(F("Body size: "));
     Serial.println(body_len);
 
-    Serial.print(F("# Body: "));
+    Serial.print(F("Body: "));
     Serial.println(g_body);
     Serial.println();
 }
@@ -74,23 +74,24 @@ void extractMsgFromBody()
     int it_msg = 0;
 
     if (addr_start_msg != NULL)
-        idx_start_msg = addr_start_msg - g_body; // position where "message=" starts
+        idx_start_msg = addr_start_msg - g_body;  // position where "message=" starts
 
-    if (idx_start_msg != -1 && idx_start_msg + 8 < MAX_BODY_LEN)
+    if (idx_start_msg != -1 && idx_start_msg + 8 < MAX_LEN_BODY)
     {
         it_body = idx_start_msg + 8;
-        while (it_body < MAX_BODY_LEN - 1 && // copies only untill the body limit and/or
-                g_body[it_body] != '\0' &&    // copies only untill proper message end and/or
-                it_msg < MAX_MSG_LEN - 1)    // copies only untill the message limit
+        while (it_body < MAX_LEN_BODY - 1 &&  // body limit
+               g_body[it_body] != '\0' &&     // proper message end and/or
+               it_msg < MAX_LEN_MSG - 1)      // message limit
             g_message[it_msg++] = g_body[it_body++];
-        g_message[it_msg] = '\0'; // ensures str terminator
-        Serial.print(F("# Message size: "));
+        g_message[it_msg] = '\0';  // ensures str terminator
+
+        Serial.print(F("Message size: "));
         Serial.println(it_msg);
     }
     else
-        g_message[0] = '\0'; // empty message
+        g_message[0] = '\0';  // empty message
 
-    Serial.print(F("# Message: "));
+    Serial.print(F("Message: "));
     Serial.println(g_message);
 }
 
@@ -161,7 +162,7 @@ void setup()
     server.begin();
 
     // Print the IP address
-    Serial.print(F("Serving at "));
+    Serial.print(F("IP: "));
     Serial.println(WiFi.localIP());
 }
 
@@ -205,8 +206,8 @@ void loop()
             client.print(F("</body></html>"));
         }
         else if (strstr(g_request, "/send/browser/text") != NULL ||
-                strstr(g_request, "/send/browser/url") != NULL ||
-                strstr(g_request, "/send/cli") != NULL)
+                 strstr(g_request, "/send/browser/url") != NULL ||
+                 strstr(g_request, "/send/cli") != NULL)
         {
             // Read HTML body and write in the g_body array
             readBody(&client);
@@ -226,7 +227,7 @@ void loop()
             if (strstr(g_request, "/send/browser") != NULL)
             {
                 decode();
-                Serial.print(F("# Decoded Message: "));
+                Serial.print(F("Decoded Message: "));
                 Serial.println(g_message);
                 Serial.println();
             }
@@ -277,7 +278,7 @@ void loop()
             client.print(F("<head><title>clear</title></head>\r\n"));
             client.print(F("<body style='font-family: Arial; text-align: center;'>\r\n"));
             client.print(F("<br><br><dialog open id='mcd'><p>Messages cleared!</p>"));
-            client.print(F("<button onclick=\"window.location.href='/'\">Close</button>")); // <button onclick='document.getElementById(\"mcd\").close()'>Close</button></dialog>"));
+            client.print(F("<button onclick=\"window.location.href='/'\">Close</button>"));  // <button onclick='document.getElementById(\"mcd\").close()'>Close</button></dialog>"));
             client.print(F("</body></html>"));
         }
         else // Home
