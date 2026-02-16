@@ -316,19 +316,19 @@ void loop()
                 "<body style='font-family: Arial; text-align: center;'>"
                 "<h1>Message server</h1>"
 
-            // 1. Form to send a message
+                // 1. Form to send a message
                 "<br><br><form action='/form' method='GET'>"
                 "<button type='submit'>Send</button></form>"
 
-            // 2. Look messages sent
+                // 2. Look messages sent
                 "<br><form action='look' method='GET'>"
                 "<button type='submit'>Look</button></form>"
 
-            // 3. Clear messages
+                // 3. Clear messages
                 "<br><form action='/clear' method='GET'>"
                 "<button type='submit'>Clear</button></form>"
 
-            // 4. Hardware info
+                // 4. Hardware info
                 "<br><br>"
                 "<dialog id='hd'><p>ESP8266-01</p><button onclick='hd.close()'>Close</button></dialog>"
                 "<button onclick='hd.showModal()'>Hardware info</button>"
