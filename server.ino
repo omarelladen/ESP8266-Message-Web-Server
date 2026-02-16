@@ -12,7 +12,9 @@
 
 #define HTML_START "<!DOCTYPE HTML><html>"
 #define HTML_END   "</html>"
-#define HTML_BODY_START "<body style='font-family: Arial; text-align: center;'>"
+#define HTML_BODY_STYLE "style='font-family: Arial; text-align: center;'"
+
+#define MSG_FIELD "message"
 
 #define SSID ""
 #define PASSWORD ""
@@ -82,13 +84,13 @@ void readBody(WiFiClient* p_client)
 void extractMsgFromBody()
 {
     int idx_start_msg = -1;
-    const char* key = "message=";
+    const char* key = MSG_FIELD "=";
     char* addr_start_msg = strstr(g_body, key);
     int it_body;
     int it_msg = 0;
 
     if (addr_start_msg)
-        idx_start_msg = addr_start_msg - g_body;  // where "message=" starts
+        idx_start_msg = addr_start_msg - g_body;  // where MSG_FIELD= starts
 
     if (idx_start_msg != -1 && idx_start_msg + 8 < MAX_LEN_BODY)
     {
@@ -203,19 +205,19 @@ void loop()
             client.print(F(
                 "<!DOCTYPE HTML><html>"
                 "<head><title>Form</title></head>"
-                HTML_BODY_START
+                "<body " HTML_BODY_STYLE ">"
                 "<h2>Send a message:</h2>"
 
                 // Form to send a text
                 "<br><br>"
                 "<form action='/send/browser/text' method='POST'>"
-                "<input type='text' name='message' placeholder='Text'>"
+                "<input type='text' name='" MSG_FIELD "' placeholder='Text'>"
                 "<input type='submit' value='Send'></form>"
 
                 // Form to send a URL
                 "<br><br>"
                 "<form action='/send/browser/url' method='POST'>"
-                "<input type='text' name='message' placeholder='URL'>"
+                "<input type='text' name='" MSG_FIELD "' placeholder='URL'>"
                 "<input type='submit' value='Send'></form>"
 
                 // Back button
@@ -284,7 +286,7 @@ void loop()
             client.print(F(
                 HTML_START
                 "<head><title>Look</title></head>"
-                HTML_BODY_START
+                "<body " HTML_BODY_STYLE ">"
                 "<h2>List of messages:</h2>"
             ));
 
@@ -326,7 +328,7 @@ void loop()
             client.print(F(
                 HTML_START
                 "<head><title>Home</title></head>"
-                HTML_BODY_START
+                "<body " HTML_BODY_STYLE ">"
                 "<h1>Message server</h1>"
 
                 // Forms to send a message
