@@ -188,16 +188,15 @@ void loop()
 
     // Check if a client has connected
     WiFiClient client = g_server.accept();
-
-    // it is OK for multiple small client.print/write,
-    // because nagle algorithm will group them into one single packet
-
     if (client)
     {
         client.setTimeout(1000);
 
         // Read the first line of the request
         readRequestLine(&client);
+
+        // it is OK for multiple small client.print/write,
+        // because nagle algorithm will group them into one single packet
 
         if (strstr(g_request, "/form"))
         {
@@ -263,7 +262,6 @@ void loop()
             }
 
             sendHeader(&client);
-
             // Dialog
             if (strstr(g_request, "/send/browser"))
             {
@@ -271,7 +269,7 @@ void loop()
                     HTML_START
                     "<head><title>Sent</title></head>"
                     "<script>"
-                    "alert('Message sent!');"
+                    "alert('Message received!');"
                     "window.location.href='/form';"
                     "</script>"
                     HTML_END
