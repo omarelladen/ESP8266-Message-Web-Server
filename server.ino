@@ -10,14 +10,20 @@
 #define MAX_LEN_MSG  512
 #define MAX_LEN_REQ  50
 
+#define HTML_START "<!DOCTYPE HTML><html>"
+#define HTML_END   "</html>"
+#define HTML_BODY_START "<body style='font-family: Arial; text-align: center;'>"
 
-#define ssid ""
-#define password ""
+#define SSID ""
+#define PASSWORD ""
+
 
 WiFiServer g_server(80);  // arg is the port to listen on
 
 int g_num_messages = 0;
-char g_messages[MAX_NUM_MSGS][MAX_LEN_MSG];  // pre alocated  to prevent fragmentation
+
+char g_messages[MAX_NUM_MSGS][MAX_LEN_MSG];  // pre alocate to prevent fragmentation
+
 char g_body[MAX_LEN_BODY];
 char g_message[MAX_LEN_MSG];
 char g_request[MAX_LEN_REQ];
@@ -26,7 +32,8 @@ char g_request[MAX_LEN_REQ];
 void sendHeader(WiFiClient* p_client)
 {
     p_client->print(F(
-        "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Type: text/html\r\n\r\n"
     ));
 }
 
@@ -81,7 +88,7 @@ void extractMsgFromBody()
     int it_msg = 0;
 
     if (addr_start_msg)
-        idx_start_msg = addr_start_msg - g_body;  // position where "message=" starts
+        idx_start_msg = addr_start_msg - g_body;  // where "message=" starts
 
     if (idx_start_msg != -1 && idx_start_msg + 8 < MAX_LEN_BODY)
     {
@@ -157,7 +164,7 @@ void setup()
 
     // Connect to WiFi network
     WiFi.mode(WIFI_STA);
-    WiFi.begin(ssid, password);
+    WiFi.begin(SSID, PASSWORD);
     while (WiFi.status() != WL_CONNECTED)
     {
         delay(500);
@@ -175,14 +182,13 @@ void setup()
 
 void loop()
 {
-    // it is OK for multiple small client.print/write,
-    // because nagle algorithm will group them into one single packet
-
-    // Check if a client has connected
-
     int i;
 
+    // Check if a client has connected
     WiFiClient client = g_server.accept();
+
+    // it is OK for multiple small client.print/write,
+    // because nagle algorithm will group them into one single packet
 
     if (client)
     {
@@ -196,23 +202,28 @@ void loop()
             sendHeader(&client);
             client.print(F(
                 "<!DOCTYPE HTML><html>"
-                "<head><title>form</title></head>"
-                "<body style='font-family: Arial; text-align: center;'>"
+                "<head><title>Form</title></head>"
+                HTML_BODY_START
                 "<h2>Send a message:</h2>"
 
                 // Form to send a text
-                "<br><br><form action='/send/browser/text' method='POST'>"
+                "<br><br>"
+                "<form action='/send/browser/text' method='POST'>"
                 "<input type='text' name='message' placeholder='Text'>"
                 "<input type='submit' value='Send'></form>"
 
                 // Form to send a URL
-                "<br><br><form action='/send/browser/url' method='POST'>"
+                "<br><br>"
+                "<form action='/send/browser/url' method='POST'>"
                 "<input type='text' name='message' placeholder='URL'>"
                 "<input type='submit' value='Send'></form>"
 
                 // Back button
-                "<br><br><button onclick=\"window.location.href='/'\">Back</button>"
-                "</body></html>"
+                "<br><br>"
+                "<button onclick=\"window.location.href='/'\">Back</button>"
+
+                "</body>"
+                HTML_END
             ));
         }
         else if (strstr(g_request, "/send/browser/text") ||
@@ -222,7 +233,7 @@ void loop()
             // Read HTML body and write in the g_body array
             readBody(&client);
 
-            // Extract the message from the body and write in the g_message array
+            // Extract the message from the body and write in the msg array
             extractMsgFromBody();
 
             if (strstr(g_request, "/send/browser/text"))
@@ -255,13 +266,13 @@ void loop()
             if (strstr(g_request, "/send/browser"))
             {
                 client.print(F(
-                    "<!DOCTYPE HTML><html>"
+                    HTML_START
                     "<head><title>Sent</title></head>"
                     "<script>"
                     "alert('Message sent!');"
                     "window.location.href='/form';"
                     "</script>"
-                    "</html>"
+                    HTML_END
                 ));
             }
         }
@@ -271,9 +282,9 @@ void loop()
 
             sendHeader(&client);
             client.print(F(
-                "<!DOCTYPE HTML><html>"
-                "<head><title>look</title></head>"
-                "<body style='font-family: Arial; text-align: center;'>"
+                HTML_START
+                "<head><title>Look</title></head>"
+                HTML_BODY_START
                 "<h2>List of messages:</h2>"
             ));
 
@@ -286,53 +297,62 @@ void loop()
 
             // Back button
             client.print(F(
-                "<br><br><button onclick=\"window.location.href='/'\">Back</button>"
-                "</body></html>"
+                "<br><br>"
+                "<button onclick=\"window.location.href='/'\">Back</button>"
+                "</body>"
+                HTML_END
             ));
         }
         else if (strstr(g_request, "/clear"))
         {
             // Clear messages
-
             g_num_messages = 0;
 
+            // Dialog
             sendHeader(&client);
             client.print(F(
-                "<!DOCTYPE HTML><html>"
+                HTML_START
                 "<head><title>Cleared</title></head>"
                 "<script>"
                 "alert('Messages cleared!');"
                 "window.location.href='/';"
                 "</script>"
-                "</html>"
+                HTML_END
             ));
         }
-        else // Home
+        else  // Home
         {
             sendHeader(&client);
             client.print(F(
-                "<!DOCTYPE HTML><html>"
+                HTML_START
                 "<head><title>Home</title></head>"
-                "<body style='font-family: Arial; text-align: center;'>"
+                HTML_BODY_START
                 "<h1>Message server</h1>"
 
-                // 1. Form to send a message
-                "<br><br><form action='/form' method='GET'>"
+                // Forms to send a message
+                "<br><br>"
+                "<form action='/form' method='GET'>"
                 "<button type='submit'>Send</button></form>"
 
-                // 2. Look messages sent
-                "<br><form action='look' method='GET'>"
+                // Look messages sent
+                "<br>"
+                "<form action='look' method='GET'>"
                 "<button type='submit'>Look</button></form>"
 
-                // 3. Clear messages
-                "<br><form action='/clear' method='GET'>"
+                // Clear messages
+                "<br>"
+                "<form action='/clear' method='GET'>"
                 "<button type='submit'>Clear</button></form>"
 
-                // 4. Hardware info
+                // Hardware info
                 "<br><br>"
-                "<dialog id='hd'><p>ESP8266-01</p><button onclick='hd.close()'>Close</button></dialog>"
+                "<dialog id='hd'><p>ESP8266-01</p>"
+                "<button onclick='hd.close()'>Close</button>"
+                "</dialog>"
                 "<button onclick='hd.showModal()'>Hardware info</button>"
-                "</body></html>"
+
+                "</body>"
+                HTML_END
             ));
         }
 
