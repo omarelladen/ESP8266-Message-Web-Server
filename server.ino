@@ -240,12 +240,13 @@ void loop()
             }
 
             // Dialog
-            client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML><html>"));
-            client.print(F("<head><title>sent</title></head>"));
-            client.print(F("<body style='font-family: Arial; text-align: center;'>"));
-            client.print(F("<br><br><dialog open id='md'><p>Message sent!</p>"));
-            client.print(F("<button onclick=\"window.location.href='/'\">Close</button>"));
-            client.print(F("</body></html>"));
+            client.print(F("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML><html>"));
+            client.print(F("<head><title>Sent</title></head>"));
+            client.print(F("<script>"));
+            client.print(F("alert('Message sent!');"));
+            client.print(F("window.location.href='/';"));
+            client.print(F("</script>"));
+            client.print(F("</html>"));
         }
         else if (strstr(g_request, "/look") != NULL)
         {
@@ -274,12 +275,13 @@ void loop()
 
             num_messages = 0;
 
-            client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML><html>"));
-            client.print(F("<head><title>clear</title></head>"));
-            client.print(F("<body style='font-family: Arial; text-align: center;'>"));
-            client.print(F("<br><br><dialog open id='mcd'><p>Messages cleared!</p>"));
-            client.print(F("<button onclick=\"window.location.href='/'\">Close</button>"));  // <button onclick='document.getElementById(\"mcd\").close()'>Close</button></dialog>"));
-            client.print(F("</body></html>"));
+            client.print(F("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML><html>"));
+            client.print(F("<head><title>Cleared</title></head>"));
+            client.print(F("<script>"));
+            client.print(F("alert('Message sent!');"));
+            client.print(F("window.location.href='/';"));
+            client.print(F("</script>"));
+            client.print(F("</html>"));
         }
         else // Home
         {
@@ -308,7 +310,8 @@ void loop()
 
             // 4. Hardware info
             client.print(F("<br><br>"));
-            client.print(F("<dialog id='hd'><p>ESP8266-01</p><button onclick='hd.close()'>Close</button></dialog><button onclick='hd.showModal()'>Hardware info</button>"));
+            client.print(F("<dialog id='hd'><p>ESP8266-01</p><button onclick='hd.close()'>Close</button></dialog>"));
+            client.print(F("<button onclick='hd.showModal()'>Hardware info</button>"));
             client.print(F("</body></html>"));
         }
 
