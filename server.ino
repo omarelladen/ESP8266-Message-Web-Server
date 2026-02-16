@@ -186,10 +186,10 @@ void loop()
 
         if (strstr(g_request, "/form") != NULL)
         {
-            client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\n"));
-            client.print(F("<head><title>form</title></head>\r\n"));
-            client.print(F("<body style='font-family: Arial; text-align: center;'>\r\n"));
-            client.print(F("<h2>Send a message:</h2>\r\n"));
+            client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML><html>"));
+            client.print(F("<head><title>form</title></head>"));
+            client.print(F("<body style='font-family: Arial; text-align: center;'>"));
+            client.print(F("<h2>Send a message:</h2>"));
 
             // Form to send a text
             client.print(F("<br><br><form action='/send/browser/text' method='POST'>"));
@@ -240,9 +240,9 @@ void loop()
             }
 
             // Dialog
-            client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\n"));
-            client.print(F("<head><title>sent</title></head>\r\n"));
-            client.print(F("<body style='font-family: Arial; text-align: center;'>\r\n"));
+            client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML><html>"));
+            client.print(F("<head><title>sent</title></head>"));
+            client.print(F("<body style='font-family: Arial; text-align: center;'>"));
             client.print(F("<br><br><dialog open id='md'><p>Message sent!</p>"));
             client.print(F("<button onclick=\"window.location.href='/'\">Close</button>"));
             client.print(F("</body></html>"));
@@ -251,10 +251,10 @@ void loop()
         {
             // Show messages sent
 
-            client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\n"));
-            client.print(F("<head><title>look</title></head>\r\n"));
-            client.print(F("<body style='font-family: Arial; text-align: center;'>\r\n"));
-            client.print(F("<h2>List of messages:</h2>\r\n"));
+            client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML><html>"));
+            client.print(F("<head><title>look</title></head>"));
+            client.print(F("<body style='font-family: Arial; text-align: center;'>"));
+            client.print(F("<h2>List of messages:</h2>"));
 
             for (i=0; i < num_messages; i++)
             {
@@ -274,37 +274,37 @@ void loop()
 
             num_messages = 0;
 
-            client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\n"));
-            client.print(F("<head><title>clear</title></head>\r\n"));
-            client.print(F("<body style='font-family: Arial; text-align: center;'>\r\n"));
+            client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML><html>"));
+            client.print(F("<head><title>clear</title></head>"));
+            client.print(F("<body style='font-family: Arial; text-align: center;'>"));
             client.print(F("<br><br><dialog open id='mcd'><p>Messages cleared!</p>"));
             client.print(F("<button onclick=\"window.location.href='/'\">Close</button>"));  // <button onclick='document.getElementById(\"mcd\").close()'>Close</button></dialog>"));
             client.print(F("</body></html>"));
         }
         else // Home
         {
-            client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\n"));
-            client.print(F("<head><title>Home</title></head>\r\n"));
-            client.print(F("<body style='font-family: Arial; text-align: center;'>\r\n"));
-            client.print(F("<h1>Message server</h1>\r\n"));
+            client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML><html>"));
+            client.print(F("<head><title>Home</title></head>"));
+            client.print(F("<body style='font-family: Arial; text-align: center;'>"));
+            client.print(F("<h1>Message server</h1>"));
 
             // 1. Form to send a message
             client.print(F("<br><br><form action='http://"));
             client.print(WiFi.localIP());
             client.print(F("/form' method='GET'>"));
-            client.print(F("<button type='submit'>Send</button></form>\r\n"));
+            client.print(F("<button type='submit'>Send</button></form>"));
 
             // 2. Look messages sent
             client.print(F("<br><form action='http://"));
             client.print(WiFi.localIP());
             client.print(F("/look' method='GET'>"));
-            client.print(F("<button type='submit'>Look</button></form>\r\n"));
+            client.print(F("<button type='submit'>Look</button></form>"));
 
             // 3. Clear messages
             client.print(F("<br><form action='http://"));
             client.print(WiFi.localIP());
             client.print(F("/clear' method='GET'>"));
-            client.print(F("<button type='submit'>Clear</button></form>\r\n"));
+            client.print(F("<button type='submit'>Clear</button></form>"));
 
             // 4. Hardware info
             client.print(F("<br><br>"));
