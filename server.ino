@@ -23,6 +23,13 @@ char g_message[MAX_LEN_MSG];
 char g_request[MAX_LEN_REQ];
 
 
+void sendHeader(WiFiClient* p_client)
+{
+    p_client->print(F(
+        "HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML><html>"
+    ));
+}
+
 void readRequestLine(WiFiClient* p_client)
 {
     int i = 0;
@@ -186,7 +193,8 @@ void loop()
 
         if (strstr(g_request, "/form") != NULL)
         {
-            client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML><html>"));
+            // client.print(F(HTML_HEADER));
+            sendHeader(&client);
             client.print(F("<head><title>form</title></head>"));
             client.print(F("<body style='font-family: Arial; text-align: center;'>"));
             client.print(F("<h2>Send a message:</h2>"));
@@ -240,7 +248,7 @@ void loop()
             }
 
             // Dialog
-            client.print(F("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML><html>"));
+            sendHeader(&client);
             client.print(F("<head><title>Sent</title></head>"));
             client.print(F("<script>"));
             client.print(F("alert('Message sent!');"));
@@ -252,7 +260,7 @@ void loop()
         {
             // Show messages sent
 
-            client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML><html>"));
+            sendHeader(&client);
             client.print(F("<head><title>look</title></head>"));
             client.print(F("<body style='font-family: Arial; text-align: center;'>"));
             client.print(F("<h2>List of messages:</h2>"));
@@ -275,7 +283,7 @@ void loop()
 
             num_messages = 0;
 
-            client.print(F("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML><html>"));
+            sendHeader(&client);
             client.print(F("<head><title>Cleared</title></head>"));
             client.print(F("<script>"));
             client.print(F("alert('Message sent!');"));
@@ -285,7 +293,7 @@ void loop()
         }
         else // Home
         {
-            client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML><html>"));
+            sendHeader(&client);
             client.print(F("<head><title>Home</title></head>"));
             client.print(F("<body style='font-family: Arial; text-align: center;'>"));
             client.print(F("<h1>Message server</h1>"));
