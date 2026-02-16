@@ -32,7 +32,7 @@ void readRequestLine(WiFiClient* p_client)
     while (p_client->available() && i < MAX_REQ_LEN - 1)
     {
         c = p_client->read();
-        
+
         // Stops in the first '\r'
         if (c == '\r')
             break;
@@ -100,7 +100,7 @@ void decode()
     char *follower = leader;
     char high;
     char low;
-    
+
     // While we're not at the end of the str (current character not NULL)
     while (*leader)
     {
@@ -141,7 +141,7 @@ void setup()
 {
     Serial.begin(115200);
     delay(2000);
-    
+
     // pinMode(GPIO0, OUTPUT);
     // pinMode(GPIO1, OUTPUT);
     // pinMode(GPIO2, OUTPUT);
@@ -177,7 +177,7 @@ void loop()
     WiFiClient client = server.accept();
 
     if (client)
-    {        
+    {
         client.setTimeout(1000);
 
         // Read the first line of the request
@@ -249,14 +249,14 @@ void loop()
         else if (strstr(g_request, "/look") != NULL)
         {
             // Show messages sent
-            
+
             client.print(F("HTTP/1.1 200 OK\r\ncountent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\n"));
             client.print(F("<head><title>look</title></head>\r\n"));
             client.print(F("<body style='font-family: Arial; text-align: center;'>\r\n"));
             client.print(F("<h2>List of messages:</h2>\r\n"));
-            
+
             for (i=0; i < num_messages; i++)
-            {  
+            {
                 client.print(F("<br>"));
                 client.print(F("<pre>"));
                 client.print(g_messages[i]);
@@ -269,7 +269,7 @@ void loop()
         }
         else if (strstr(g_request, "/clear") != NULL)
         {
-            // Clear messages 
+            // Clear messages
 
             num_messages = 0;
 
