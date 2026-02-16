@@ -11,13 +11,13 @@
 #define MAX_LEN_REQ  50
 
 
-const char ssid[] = "";
-const char password[] = "";
+#define ssid ""
+#define password ""
 
-WiFiServer server(80);  // arg is the port to listen on
+WiFiServer g_server(80);  // arg is the port to listen on
 
-int num_messages = 0;
-char g_messages[MAX_NUM_MSGS][MAX_LEN_MSG];  // pre alocated space for the messages so that there is no memory fragmentation
+int g_num_messages = 0;
+char g_messages[MAX_NUM_MSGS][MAX_LEN_MSG];  // pre alocated  to prevent fragmentation
 char g_body[MAX_LEN_BODY];
 char g_message[MAX_LEN_MSG];
 char g_request[MAX_LEN_REQ];
@@ -166,7 +166,7 @@ void setup()
     Serial.println();
 
     // Start the server
-    server.begin();
+    g_server.begin();
 
     // Print the IP address
     Serial.print(F("IP: "));
@@ -182,7 +182,7 @@ void loop()
 
     int i;
 
-    WiFiClient client = server.accept();
+    WiFiClient client = g_server.accept();
 
     if (client)
     {
@@ -241,10 +241,10 @@ void loop()
             }
 
             // Save text in memory
-            if (num_messages < MAX_NUM_MSGS)
+            if (g_num_messages < MAX_NUM_MSGS)
             {
-                strcpy(g_messages[num_messages], g_message);
-                num_messages++;
+                strcpy(g_messages[g_num_messages], g_message);
+                g_num_messages++;
             }
 
             // Dialog
@@ -265,7 +265,7 @@ void loop()
             client.print(F("<body style='font-family: Arial; text-align: center;'>"));
             client.print(F("<h2>List of messages:</h2>"));
 
-            for (i=0; i < num_messages; i++)
+            for (i=0; i < g_num_messages; i++)
             {
                 client.print(F("<br>"));
                 client.print(F("<pre>"));
@@ -281,7 +281,7 @@ void loop()
         {
             // Clear messages
 
-            num_messages = 0;
+            g_num_messages = 0;
 
             sendHeader(&client);
             client.print(F("<head><title>Cleared</title></head>"));
