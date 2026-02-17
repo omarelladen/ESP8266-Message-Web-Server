@@ -24,6 +24,7 @@ void sendHeader(WiFiClient* p_client)
 void readRequestLine(WiFiClient* p_client)
 {
     int i = 0;
+    int req_len = 0;
     char c;
 
     delay(1000);
@@ -36,8 +37,15 @@ void readRequestLine(WiFiClient* p_client)
             break;
 
         g_request[i++] = c;
+        req_len++;
     }
     g_request[i] = '\0';
+
+    Serial.print(F("Request len: "));
+    Serial.println(req_len);
+    Serial.print(F("Request: "));
+    Serial.println(g_request);
+    Serial.println();
 }
 
 void readBody(WiFiClient* p_client)
@@ -55,9 +63,8 @@ void readBody(WiFiClient* p_client)
     }
     g_body[i] = '\0';
 
-    Serial.print(F("Body size: "));
+    Serial.print(F("Body len: "));
     Serial.println(body_len);
-
     Serial.print(F("Body: "));
     Serial.println(g_body);
     Serial.println();
@@ -74,16 +81,16 @@ void extractMsgFromBody()
     if (addr_start_msg)
         idx_start_msg = addr_start_msg - g_body;  // where MSG_FIELD= starts
 
-    if (idx_start_msg != -1 && idx_start_msg + 8 < MAX_LEN_BODY)
+    if (idx_start_msg != -1 && idx_start_msg + MSG_FIELD_LEN+1 < MAX_LEN_BODY)
     {
-        it_body = idx_start_msg + 8;
+        it_body = idx_start_msg + MSG_FIELD_LEN+1;
         while (it_body < MAX_LEN_BODY - 1 &&  // body limit
                g_body[it_body] != '\0' &&     // proper message end and/or
                it_msg < MAX_LEN_MSG - 1)      // message limit
             g_message[it_msg++] = g_body[it_body++];
         g_message[it_msg] = '\0';  // ensures str terminator
 
-        Serial.print(F("Message size: "));
+        Serial.print(F("Message len: "));
         Serial.println(it_msg);
     }
     else
@@ -93,7 +100,7 @@ void extractMsgFromBody()
     Serial.println(g_message);
 }
 
-void decode()
+void decodeMsg()
 {
     char *leader = g_message;
     char *follower = leader;
@@ -230,7 +237,7 @@ void loop()
             // Decode only messages sent from browser
             if (strstr(g_request, EP_BASE_SEND))
             {
-                decode();
+                decodeMsg();
                 Serial.print(F("Decoded Message: "));
                 Serial.println(g_message);
                 Serial.println();
@@ -267,7 +274,7 @@ void loop()
                 HTML_START
                 "<head><title>Look</title></head>"
                 "<body " HTML_BODY_STYLE ">"
-                "<h2>List of messages:</h2>"
+                "<h2>Messages:</h2>"
             ));
 
             for (i=0; i < g_num_messages; i++)
