@@ -7,5 +7,3 @@
 <br>
 <img src="imgs/look.png">
 </p>
-
-
