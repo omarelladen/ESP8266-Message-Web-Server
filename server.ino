@@ -16,6 +16,16 @@
 
 #define MSG_FIELD "message"
 
+#define EP_SEND      "/form"
+#define EP_BASE_SEND "/send/browser"
+#define EP_SEND_TEXT "/send/browser/text"
+#define EP_SEND_URL  "/send/browser/url"
+#define EP_SEND_CLI  "/send/cli"
+#define EP_LOOK      "/look"
+#define EP_CLEAR     "/clear"
+
+#define HW_NAME "ESP8266-01"
+
 #define SSID ""
 #define PASSWORD ""
 
@@ -198,7 +208,7 @@ void loop()
         // it is OK for multiple small client.print/write,
         // because nagle algorithm will group them into one single packet
 
-        if (strstr(g_request, "/form"))
+        if (strstr(g_request, EP_SEND))
         {
             sendHeader(&client);
             client.print(F(
@@ -209,13 +219,13 @@ void loop()
 
                 // Form to send a text
                 "<br><br>"
-                "<form action='/send/browser/text' method='POST'>"
+                "<form action='" EP_SEND_TEXT "' method='POST'>"
                 "<input type='text' name='" MSG_FIELD "' placeholder='Text'>"
                 "<input type='submit' value='Send'></form>"
 
                 // Form to send a URL
                 "<br><br>"
-                "<form action='/send/browser/url' method='POST'>"
+                "<form action='" EP_SEND_URL "' method='POST'>"
                 "<input type='text' name='" MSG_FIELD "' placeholder='URL'>"
                 "<input type='submit' value='Send'></form>"
 
@@ -227,9 +237,9 @@ void loop()
                 HTML_END
             ));
         }
-        else if (strstr(g_request, "/send/browser/text") ||
-                 strstr(g_request, "/send/browser/url") ||
-                 strstr(g_request, "/send/cli"))
+        else if (strstr(g_request, EP_SEND_TEXT) ||
+                 strstr(g_request, EP_SEND_URL) ||
+                 strstr(g_request, EP_SEND_CLI))
         {
             // Read HTML body and write in the g_body array
             readBody(&client);
@@ -237,7 +247,7 @@ void loop()
             // Extract the message from the body and write in the msg array
             extractMsgFromBody();
 
-            if (strstr(g_request, "/send/browser/text"))
+            if (strstr(g_request, EP_SEND_TEXT))
             {
                 // Replace '+' with ' '
                 for (i = 0; g_message[i] != '\0'; i++)
@@ -246,7 +256,7 @@ void loop()
             }
 
             // Decode only messages sent from browser
-            if (strstr(g_request, "/send/browser"))
+            if (strstr(g_request, EP_BASE_SEND))
             {
                 decode();
                 Serial.print(F("Decoded Message: "));
@@ -263,20 +273,20 @@ void loop()
 
             sendHeader(&client);
             // Dialog
-            if (strstr(g_request, "/send/browser"))
+            if (strstr(g_request, EP_BASE_SEND))
             {
                 client.print(F(
                     HTML_START
                     "<head><title>Sent</title></head>"
                     "<script>"
                     "alert('Message received!');"
-                    "window.location.href='/form';"
+                    "window.location.href='" EP_SEND "';"
                     "</script>"
                     HTML_END
                 ));
             }
         }
-        else if (strstr(g_request, "/look"))
+        else if (strstr(g_request, EP_LOOK))
         {
             // Show messages sent
 
@@ -303,7 +313,7 @@ void loop()
                 HTML_END
             ));
         }
-        else if (strstr(g_request, "/clear"))
+        else if (strstr(g_request, EP_CLEAR))
         {
             // Clear messages
             g_num_messages = 0;
@@ -331,22 +341,23 @@ void loop()
 
                 // Forms to send a message
                 "<br><br>"
-                "<form action='/form' method='GET'>"
+                "<form action='" EP_SEND "' method='GET'>"
                 "<button type='submit'>Send</button></form>"
 
                 // Look messages sent
                 "<br>"
-                "<form action='look' method='GET'>"
+                "<form action='" EP_LOOK "' method='GET'>"
                 "<button type='submit'>Look</button></form>"
 
                 // Clear messages
                 "<br>"
-                "<form action='/clear' method='GET'>"
+                "<form action='" EP_CLEAR "' method='GET'>"
                 "<button type='submit'>Clear</button></form>"
 
                 // Hardware info
                 "<br><br>"
-                "<dialog id='hd'><p>ESP8266-01</p>"
+                "<dialog id='hd'>"
+                "<p>" HW_NAME "</p>"
                 "<button onclick='hd.close()'>Close</button>"
                 "</dialog>"
                 "<button onclick='hd.showModal()'>Hardware info</button>"
