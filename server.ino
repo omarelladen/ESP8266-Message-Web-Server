@@ -258,10 +258,12 @@ void loop()
                 client.print(F(
                     HTML_START
                     "<head><title>Sent</title></head>"
+                    "<body>"
                     "<script>"
                     "alert('Message received!');"
                     "window.location.href='" EP_SEND "';"
                     "</script>"
+                    "</body>"
                     HTML_END
                 ));
             }
@@ -303,10 +305,12 @@ void loop()
             client.print(F(
                 HTML_START
                 "<head><title>Cleared</title></head>"
+                "<body>"
                 "<script>"
                 "alert('Messages cleared!');"
                 "window.location.href='/';"
                 "</script>"
+                "</body>"
                 HTML_END
             ));
         }
