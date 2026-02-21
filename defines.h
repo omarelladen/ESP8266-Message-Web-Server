@@ -27,3 +27,5 @@
 
 #define SSID ""
 #define PASSWORD ""
+
+#define PORT 80

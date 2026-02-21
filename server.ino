@@ -2,7 +2,7 @@
 #include "defines.h"
 
 
-WiFiServer g_server(80);  // arg is the port to listen on
+WiFiServer g_server(PORT);
 
 int g_num_messages = 0;
 
