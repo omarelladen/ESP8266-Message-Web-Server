@@ -13,7 +13,6 @@
 #define HTML_BODY_STYLE "style='font-family: Arial; text-align: center;'"
 
 #define MSG_FIELD "msg"
-#define MSG_FIELD_LEN 3
 
 #define EP_SEND      "/form"
 #define EP_BASE_SEND "/send/browser"

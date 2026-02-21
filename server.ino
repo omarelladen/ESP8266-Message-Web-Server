@@ -77,13 +77,14 @@ void extractMsgFromBody()
     char* addr_start_msg = strstr(g_body, key);
     int it_body;
     int it_msg = 0;
+    int msg_field_len = strlen(MSG_FIELD) + 1;
 
     if (addr_start_msg)
         idx_start_msg = addr_start_msg - g_body;  // where MSG_FIELD= starts
 
-    if (idx_start_msg != -1 && idx_start_msg + MSG_FIELD_LEN+1 < MAX_LEN_BODY)
+    if (idx_start_msg != -1 && idx_start_msg + msg_field_len < MAX_LEN_BODY)
     {
-        it_body = idx_start_msg + MSG_FIELD_LEN+1;
+        it_body = idx_start_msg + msg_field_len;
         while (it_body < MAX_LEN_BODY - 1 &&  // body limit
                g_body[it_body] != '\0' &&     // proper message end and/or
                it_msg < MAX_LEN_MSG - 1)      // message limit
