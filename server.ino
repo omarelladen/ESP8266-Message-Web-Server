@@ -43,11 +43,14 @@ void readRequestLine(WiFiClient* p_client)
     }
     g_request[i] = '\0';
 
-    Serial.print(F("Request len: "));
-    Serial.println(req_len);
-    Serial.print(F("Request: "));
-    Serial.println(g_request);
-    Serial.println();
+    if (DEBUG)
+    {
+        Serial.print(F("Request len: "));
+        Serial.println(req_len);
+        Serial.print(F("Request: "));
+        Serial.println(g_request);
+        Serial.println();
+    }
 }
 
 void readBody(WiFiClient* p_client)
@@ -65,11 +68,14 @@ void readBody(WiFiClient* p_client)
     }
     g_body[i] = '\0';
 
-    Serial.print(F("Body len: "));
-    Serial.println(body_len);
-    Serial.print(F("Body: "));
-    Serial.println(g_body);
-    Serial.println();
+    if (DEBUG)
+    {
+        Serial.print(F("Body len: "));
+        Serial.println(body_len);
+        Serial.print(F("Body: "));
+        Serial.println(g_body);
+        Serial.println();
+    }
 }
 
 void extractMsgFromBody()
@@ -93,14 +99,20 @@ void extractMsgFromBody()
             g_message[it_msg++] = g_body[it_body++];
         g_message[it_msg] = '\0';  // ensures str terminator
 
-        Serial.print(F("Message len: "));
-        Serial.println(it_msg);
+        if (DEBUG)
+        {
+            Serial.print(F("Message len: "));
+            Serial.println(it_msg);
+        }
     }
     else
         g_message[0] = '\0';  // empty message
 
-    Serial.print(F("Message: "));
-    Serial.println(g_message);
+    if (DEBUG)
+    {
+        Serial.print(F("Message: "));
+        Serial.println(g_message);
+    }
 }
 
 void decodeMsg()
@@ -148,13 +160,16 @@ void decodeMsg()
 
 void setup()
 {
-    Serial.begin(115200);
-    delay(2000);
-
     // pinMode(GPIO0, OUTPUT);
     // pinMode(GPIO1, OUTPUT);
     // pinMode(GPIO2, OUTPUT);
     // pinMode(GPIO3, OUTPUT);
+
+    if (DEBUG)
+    {
+        Serial.begin(115200);
+        delay(2000);
+    }
 
     // Connect to WiFi network
     WiFi.mode(WIFI_STA);
@@ -162,16 +177,21 @@ void setup()
     while (WiFi.status() != WL_CONNECTED)
     {
         delay(500);
-        Serial.print(F("."));
+        if (DEBUG)
+            Serial.print(F("."));
     }
-    Serial.println();
+    if (DEBUG)
+        Serial.println();
 
     // Start the server
     g_server.begin();
 
     // Print the IP address
-    Serial.print(F("IP: "));
-    Serial.println(WiFi.localIP());
+    if (DEBUG)
+    {
+        Serial.print(F("IP: "));
+        Serial.println(WiFi.localIP());
+    }
 }
 
 void loop()
@@ -241,9 +261,12 @@ void loop()
             if (strstr(g_request, EP_BASE_SEND))
             {
                 decodeMsg();
-                Serial.print(F("Decoded Message: "));
-                Serial.println(g_message);
-                Serial.println();
+                if (DEBUG)
+                {
+                    Serial.print(F("Decoded Message: "));
+                    Serial.println(g_message);
+                    Serial.println();
+                }
             }
 
             // Save text in memory

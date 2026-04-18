@@ -25,3 +25,5 @@
 #define HW_NAME "ESP8266-01"
 
 #define PORT 80
+
+#define DEBUG 1
