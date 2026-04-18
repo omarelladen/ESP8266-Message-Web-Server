@@ -1,5 +1,6 @@
 #include <ESP8266WiFi.h>
 #include "defines.h"
+#include "credentials.h"
 
 
 WiFiServer g_server(PORT);
@@ -17,7 +18,8 @@ void sendHeader(WiFiClient* p_client)
 {
     p_client->print(F(
         "HTTP/1.1 200 OK\r\n"
-        "Content-Type: text/html; charset=UTF-8\r\n\r\n"
+        "Content-Type: text/html; charset=UTF-8\r\n"
+        "\r\n"
     ));
 }
 
@@ -156,7 +158,7 @@ void setup()
 
     // Connect to WiFi network
     WiFi.mode(WIFI_STA);
-    WiFi.begin(SSID, PASSWORD);
+    WiFi.begin(NW_SSID, NW_PASSWORD);
     while (WiFi.status() != WL_CONNECTED)
     {
         delay(500);
@@ -338,13 +340,13 @@ void loop()
                 "<form action='" EP_CLEAR "' method='GET'>"
                 "<button type='submit'>Clear</button></form>"
 
-                // Hardware info
+                // Hardware Info
                 "<br><br>"
                 "<dialog id='hd'>"
                 "<p>" HW_NAME "</p>"
                 "<button onclick='hd.close()'>Close</button>"
                 "</dialog>"
-                "<button onclick='hd.showModal()'>Hardware info</button>"
+                "<button onclick='hd.showModal()'>Hardware Info</button>"
 
                 "</body>"
                 HTML_END
