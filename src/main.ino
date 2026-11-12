@@ -1,4 +1,5 @@
 #include <ESP8266WiFi.h>
+
 #include "defines.h"
 #include "credentials.h"
 
@@ -7,7 +8,7 @@ WiFiServer g_server(PORT);
 
 int g_num_messages = 0;
 
-char g_messages[MAX_NUM_MSGS][MAX_LEN_MSG];  // pre alocate to prevent fragmentation
+char g_messages[MAX_NUM_MSGS][MAX_LEN_MSG];
 
 char g_body[MAX_LEN_BODY];
 char g_message[MAX_LEN_MSG];
@@ -122,7 +123,7 @@ void decodeMsg()
     char high;
     char low;
 
-    // While we're not at the end of the str (current character not NULL)
+    // While we are not at the end of the str (current character not NULL)
     while (*leader)
     {
         // Check to see if the current character is a %
@@ -139,11 +140,11 @@ void decodeMsg()
                 high -= 7;
             high &= 0x0f;
 
-            // Same again for the low byte:
+            // Same again for the low byte
             if (low > 0x39) low -= 7;
             low &= 0x0f;
 
-            // Combine the two into a single byte and store in follower:
+            // Combine the two into a single byte and store in follower
             *follower = (high << 4) | low;
         }
         else
@@ -214,7 +215,7 @@ void loop()
         {
             sendHeader(&client);
             client.print(F(
-                "<!DOCTYPE HTML><html>"
+                HTML_START
                 "<head><title>Form</title></head>"
                 "<body " HTML_BODY_STYLE ">"
                 "<h2>Send a message:</h2>"
