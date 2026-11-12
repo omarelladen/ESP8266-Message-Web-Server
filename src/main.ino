@@ -46,11 +46,11 @@ void readRequestLine(WiFiClient* p_client)
 
     if (DEBUG)
     {
-        Serial.print(F("Request len: "));
-        Serial.println(req_len);
-        Serial.print(F("Request: "));
-        Serial.println(g_request);
-        Serial.println();
+        PRINT(F("Request len: "));
+        PRINTLN(req_len);
+        PRINT(F("Request: "));
+        PRINTLN(g_request);
+        PRINTLN();
     }
 }
 
@@ -71,11 +71,11 @@ void readBody(WiFiClient* p_client)
 
     if (DEBUG)
     {
-        Serial.print(F("Body len: "));
-        Serial.println(body_len);
-        Serial.print(F("Body: "));
-        Serial.println(g_body);
-        Serial.println();
+        PRINT(F("Body len: "));
+        PRINTLN(body_len);
+        PRINT(F("Body: "));
+        PRINTLN(g_body);
+        PRINTLN();
     }
 }
 
@@ -102,8 +102,8 @@ void extractMsgFromBody()
 
         if (DEBUG)
         {
-            Serial.print(F("Message len: "));
-            Serial.println(it_msg);
+            PRINT(F("Message len: "));
+            PRINTLN(it_msg);
         }
     }
     else
@@ -111,8 +111,8 @@ void extractMsgFromBody()
 
     if (DEBUG)
     {
-        Serial.print(F("Message: "));
-        Serial.println(g_message);
+        PRINT(F("Message: "));
+        PRINTLN(g_message);
     }
 }
 
@@ -168,8 +168,8 @@ void setup()
 
     if (DEBUG)
     {
-        Serial.begin(115200);
-        delay(2000);
+        SERIAL_BEGIN(115200);
+        DELAY(2000);
     }
 
     // Connect to WiFi network
@@ -179,10 +179,10 @@ void setup()
     {
         delay(500);
         if (DEBUG)
-            Serial.print(F("."));
+            PRINT(F("."));
     }
     if (DEBUG)
-        Serial.println();
+        PRINTLN();
 
     // Start the server
     g_server.begin();
@@ -190,8 +190,8 @@ void setup()
     // Print the IP address
     if (DEBUG)
     {
-        Serial.print(F("IP: "));
-        Serial.println(WiFi.localIP());
+        PRINT(F("IP: "));
+        PRINTLN(WiFi.localIP());
     }
 }
 
@@ -264,9 +264,9 @@ void loop()
                 decodeMsg();
                 if (DEBUG)
                 {
-                    Serial.print(F("Decoded Message: "));
-                    Serial.println(g_message);
-                    Serial.println();
+                    PRINT(F("Decoded Message: "));
+                    PRINTLN(g_message);
+                    PRINTLN();
                 }
             }
 

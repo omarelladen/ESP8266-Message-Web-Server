@@ -26,4 +26,15 @@
 
 #define PORT  80
 
-#define DEBUG  1
+#define DEBUG  false
+#if DEBUG
+    #define PRINT(x)         Serial.print(x)
+    #define PRINTLN(x)       Serial.println(x)
+    #define SERIAL_BEGIN(r)  Serial.begin(r)
+    #define DELAY(t)         delay(t)
+#else
+    #define PRINT(x)
+    #define PRINTLN(x)
+    #define SERIAL_BEGIN(r)
+    #define DELAY(t)
+#endif
