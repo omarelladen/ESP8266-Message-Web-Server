@@ -1,2 +1,2 @@
-#define NW_SSID ""
-#define NW_PASSWORD ""
+#define NW_SSID      ""
+#define NW_PASSWORD  ""
